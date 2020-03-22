@@ -8,7 +8,7 @@ var MessageSchema = Schema({
     emitter: { type: Schema.ObjectId, ref: 'User'},
     receiver: { type: Schema.ObjectId, ref: 'User'},
     text: String,
-    create_at: String
+    created_at: String
 });
 
 module.exports = mongoose.model('Message', MessageSchema);
