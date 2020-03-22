@@ -1,0 +1,19 @@
+{
+  "name": "social_network",
+  "version": "1.0.0",
+  "description": "backend para proyecto del curso redsocial",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/soRodriguezz/social_network.git"
+  },
+  "author": "Sebastian",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/soRodriguezz/social_network/issues"
+  },
+  "homepage": "https://github.com/soRodriguezz/social_network#readme"
+}
