@@ -3,6 +3,8 @@
 const User = require('../models/user');
 const bcrypt = require('bcrypt-nodejs');
 const jwt = require('../services/jwt');
+const user = require('../models/user');
+const mongoosePaginate = require('mongoose-pagination');
 
 function home(req, res) {
     res.status(200).send({ message: 'Raiz del proyecto'});
@@ -88,9 +90,38 @@ function loginUser (req, res) {
     });
 }
 
+// Obtener datos de un usuario
+function getUser(req, res) {
+    // dato desde la URL
+    const userId = req.params.id;
+    User.findById(userId, (err, user) => {
+        if(err) return res.status(500).send({ message: 'Error en la peticion' });
+        if(!user) return res.status(404).send({ message: 'El usuario no existe' });
+        return res.status(200).send({ user });
+    });
+}
+
+// Obtener listado de usuarios paginados
+function getUsers(req, res) {
+    const identity_user_id = req.user.sub;
+    var page = 1;
+    if(req.params.page) {
+        page = req.params.page;
+    }
+    var itemPerPage = 5;
+    User.find().sort('_id').paginate(page, itemPerPage, (err, users, total) => {
+        if(err) return res.status(500).send({ message: 'Error en la peticion' });
+        if(!users) return res.status(404).send({ message: 'No hay usuarios disponibles' });
+        // total de paginas que van a existir
+        return res.status(200).send({ users, total, pages: Math.ceil(total/itemPerPage) });
+    });
+}
+
 module.exports = {
     home,
     pruebas,
     saveUser,
-    loginUser
+    loginUser,
+    getUser,
+    getUsers
 }
