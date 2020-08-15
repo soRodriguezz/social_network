@@ -6,7 +6,7 @@ const morgan = require('morgan');
 const app = express();
 
 //CARGAR RUTAS
-
+const user_routes = require('./routes/user');
 
 //MIDDLEWARES
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -15,15 +15,8 @@ app.use(morgan('dev'));
 
 //CORES
 
-
 //RUTAS
-app.get('/', (req, res) => {
-    res.status(200).send({ message: 'Raiz del proyecto'});
-});
-
-app.get('/test', (req, res) => {
-    res.status(200).send({ message: 'Ruta test'});
-});
+app.use('/api', user_routes);
 
 // Exportar configuracion
 module.exports = app;
