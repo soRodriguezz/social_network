@@ -5,6 +5,11 @@ const bcrypt = require('bcrypt-nodejs');
 const jwt = require('../services/jwt');
 const user = require('../models/user');
 const mongoosePaginate = require('mongoose-pagination');
+//libreria filesystem de nodejs
+const fs = require('fs');
+// permite trabajar con rutas del filesystem
+const path = require('path');
+const { exists } = require('../models/user');
 
 function home(req, res) {
     res.status(200).send({ message: 'Raiz del proyecto'});
@@ -117,11 +122,85 @@ function getUsers(req, res) {
     });
 }
 
+// Editar usuario
+function updateUser(req, res){
+    const userId = req.params.id;
+    const update = req.body;
+    //borrar propiedad password
+    delete update.password;
+    // Ve si el usuario que estoy modificando soy yo
+    if(userId != req.user.sub) {
+        return res.status(500).send({ message: 'No tienes permiso para actualizar los datos del usuario' });
+    }
+    // Busca y actualiza los datos, new devuelve el objeto actualizado
+    User.findByIdAndUpdate(userId, update, {new: true}, (err, userUpdated) => {
+       if(err) return res.status(500).send({ message: 'Error en la peticion' });
+       if(!userUpdated) return res.status(404).send({ message: 'No existe el usuario' });
+       return res.status(200).send({ user: userUpdated });
+    });
+}
+
+//Subir imagenes de usuario
+function uploadImage(req, res) {
+    const userId = req.params.id;
+    if(req.files) {
+        const file_path = req.files.image.path;
+        // cortar barras invertidas y solo mostrar el nombre de la imagen
+        const file_split = file_path.split('\\');
+        const file_name = file_split[2];
+        console.log(file_name);
+        // obtiene la extension de la imagen y cortar el '.'
+        const ext_split = file_name.split('\.');
+        const file_ext = ext_split[1];
+        console.log(file_ext);
+
+        if(userId != req.user.sub) {
+            return removeFilesOfUploads(res, file_path, 'No tienes permiso para actualizar la imagen del usuario');
+        }
+
+        if(file_ext == 'png' || file_ext == 'jpg' || file_ext == 'jpeg') {
+            // Actualizar documento de usuario logueado
+            User.findByIdAndUpdate(userId, { image: file_name }, { new: true }, (err, userUpdated) => {
+                if(err) return res.status(500).send({ message: 'Error en la peticion' });
+                if(!userUpdated) return res.status(404).send({ message: 'No existe el usuario' });
+                return res.status(200).send({ user: userUpdated });
+            });
+        } else {
+            return removeFilesOfUploads(res, file_path, 'Extension no valida');
+        }
+    } else {
+        return res.status(200).send({ message: 'No se han subido imagenes '});
+    }
+}
+// Elimina la imagen si no se envia correctamente
+function removeFilesOfUploads(res, file_path, message){
+    fs.unlink(file_path, (err) => {
+        return res.status(200).send({ message: message });
+    })
+}
+
+// Devolver imagenes del usuario
+function getImageFile(req, res) {
+    const image_file = req.params.imageFile;
+    const path_file = './uploads/users/'+image_file;
+
+    fs.exists(path_file, (exists) => {
+        if(exists) {
+            res.sendFile(path.resolve(path_file));
+        } else {
+            res.status(200).send({ message: 'No existe la imagen' });
+        }
+    });
+}
+
 module.exports = {
     home,
     pruebas,
     saveUser,
     loginUser,
     getUser,
-    getUsers
+    getUsers,
+    updateUser,
+    uploadImage,
+    getImageFile
 }
