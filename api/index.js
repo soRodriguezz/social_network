@@ -2,7 +2,7 @@
 const mongoose = require('mongoose');
 const app = require('./app');
 
-// puerto del servidor
+// Puerto del servidor
 app.set('port', process.env.PORT || 3800);
 
 // * Conexion a MongoDB

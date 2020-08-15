@@ -15,8 +15,8 @@ app.use(morgan('dev'));
 
 //CORES
 
-//RUTAS
+//ROUTES
 app.use('/api', user_routes);
 
-// Exportar configuracion
+// EXPORTS SETTINGS
 module.exports = app;
